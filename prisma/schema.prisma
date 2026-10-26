@@ -1,0 +1,263 @@
+// The Great Fair (HaYarid HaGadol) — database schema
+// All money values are integer rubles.
+
+generator client {
+  provider   = "prisma-client"
+  output     = "../src/generated/prisma"
+  engineType = "client"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  MERCHANT
+  ADMIN
+}
+
+enum MerchantStatus {
+  BEGINNER
+  EXPERIENCED
+  GVIR
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum AgeGroup {
+  YOUNG
+  OLD
+}
+
+enum TargetGender {
+  ANY
+  MALE
+  FEMALE
+}
+
+enum TargetAge {
+  ANY
+  YOUNG
+  OLD
+}
+
+enum StallStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum TransactionType {
+  OPENING_GRANT
+  STALL_PURCHASE
+  STOCK_PURCHASE
+  DECORATION
+  STALL_FEE
+  SALE_INCOME
+  LOAN_TAKEN
+  LOAN_REPAYMENT
+  ADMIN_GRANT
+  STALL_SOLD
+  STALL_CLOSED_REFUND
+}
+
+enum LoanStatus {
+  OPEN
+  REPAID
+}
+
+enum NotificationType {
+  SUSPENSION
+  UNSUSPENSION
+  GRANT
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  passwordHash  String
+  displayName   String         @db.VarChar(30)
+  role          Role           @default(MERCHANT)
+  balance       Int            @default(0)
+  status        MerchantStatus @default(BEGINNER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  stalls        Stall[]
+  transactions  Transaction[]
+  loans         Loan[]
+  notifications Notification[]
+  sales         Sale[]
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(30)
+  description String?
+  products    Product[]
+}
+
+model Product {
+  id            Int          @id @default(autoincrement())
+  name          String       @unique
+  categoryId    Int
+  category      Category     @relation(fields: [categoryId], references: [id])
+  supplierPrice Int
+  marketPrice   Int
+  popularity    Int
+  targetGender  TargetGender @default(ANY)
+  targetAge     TargetAge    @default(ANY)
+  isActive      Boolean      @default(true)
+  stalls        Stall[]
+  sales         Sale[]
+
+  @@index([categoryId])
+}
+
+model Stall {
+  id               Int               @id @default(autoincrement())
+  merchantId       Int
+  merchant         User              @relation(fields: [merchantId], references: [id])
+  productId        Int
+  product          Product           @relation(fields: [productId], references: [id])
+  name             String            @db.VarChar(40)
+  price            Int
+  stock            Int               @default(0)
+  score            Float             @default(0)
+  status           StallStatus       @default(ACTIVE)
+  suspensionReason String?
+  slotNumber       Int               @unique
+  decorationSpent  Int               @default(0)
+  stockOutTicks    Int               @default(0)
+  totalTicks       Int               @default(0)
+  createdGameDay   Int
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  decorations      StallDecoration[]
+  sales            Sale[]
+
+  @@index([merchantId])
+  @@index([productId])
+}
+
+model Decoration {
+  id     Int               @id @default(autoincrement())
+  name   String            @unique
+  cost   Int
+  points Int
+  stalls StallDecoration[]
+}
+
+model StallDecoration {
+  stallId      Int
+  decorationId Int
+  addedAt      DateTime   @default(now())
+  stall        Stall      @relation(fields: [stallId], references: [id], onDelete: Cascade)
+  decoration   Decoration @relation(fields: [decorationId], references: [id])
+
+  @@id([stallId, decorationId])
+}
+
+model Customer {
+  id           Int      @id @default(autoincrement())
+  nickname     String
+  gender       Gender
+  ageGroup     AgeGroup
+  dailyBudget  Int
+  budgetLeft   Int
+  visitHour    Int
+  shoppingList Json
+  listDay      Int
+  sales        Sale[]
+
+  @@index([visitHour])
+}
+
+model Sale {
+  id             Int      @id @default(autoincrement())
+  stallId        Int?
+  stall          Stall?   @relation(fields: [stallId], references: [id], onDelete: SetNull)
+  merchantId     Int
+  merchant       User     @relation(fields: [merchantId], references: [id])
+  productId      Int
+  product        Product  @relation(fields: [productId], references: [id])
+  customerId     Int
+  customer       Customer @relation(fields: [customerId], references: [id])
+  customerGender Gender
+  customerAge    AgeGroup
+  unitPrice      Int
+  quantity       Int      @default(1)
+  gameDay        Int
+  gameHour       Int
+  createdAt      DateTime @default(now())
+
+  @@index([merchantId, gameDay])
+  @@index([stallId])
+  @@index([gameDay])
+}
+
+model SalesDailySummary {
+  id          Int  @id @default(autoincrement())
+  merchantId  Int
+  stallId     Int?
+  productId   Int
+  gameDay     Int
+  quantity    Int
+  revenue     Int
+  maleCount   Int
+  femaleCount Int
+  youngCount  Int
+  oldCount    Int
+
+  @@index([merchantId, gameDay])
+}
+
+model Transaction {
+  id           Int             @id @default(autoincrement())
+  merchantId   Int
+  merchant     User            @relation(fields: [merchantId], references: [id])
+  type         TransactionType
+  amount       Int
+  balanceAfter Int
+  description  String?
+  stallId      Int?
+  createdAt    DateTime        @default(now())
+
+  @@index([merchantId, createdAt])
+}
+
+model Loan {
+  id         Int        @id @default(autoincrement())
+  merchantId Int
+  merchant   User       @relation(fields: [merchantId], references: [id])
+  amount     Int
+  remaining  Int
+  status     LoanStatus @default(OPEN)
+  createdAt  DateTime   @default(now())
+  repaidAt   DateTime?
+
+  @@index([merchantId, status])
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+}
+
+model GameState {
+  id          Int      @id @default(1)
+  currentDay  Int      @default(1)
+  currentHour Int      @default(0)
+  lastTickAt  DateTime @default(now())
+}

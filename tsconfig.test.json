@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": true, "types": ["node"] },
+  "include": ["src/**/*.ts", "prisma/seed.ts", "tests/**/*.ts", "vitest.config.mts", "prisma.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}
