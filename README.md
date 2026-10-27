@@ -42,7 +42,7 @@ Demo users (development): `admin@yarid.local / Admin1234!` and `merchant@yarid.l
 prisma/
   schema.prisma        database models
   migrations/          SQL migrations (incl. CHECK constraints, one open loan per merchant)
-  seed.ts              8 categories, 31 products, 8 decorations, demo users
+  seed.ts              8 categories, 30 products, 8 decorations, demo users
 src/
   app.ts, server.ts    Express app and entry point
   config/              env validation (Zod)

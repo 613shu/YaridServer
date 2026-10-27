@@ -60,7 +60,6 @@ const PRODUCTS: P[] = [
   ["מטאטא", "כלי בית", 6, 12, 40, "FEMALE", "ANY"],
   ["צעיף צמר", "בדים והלבשה", 15, 30, 50, "FEMALE", "ANY"],
   ["כובע", "בדים והלבשה", 25, 50, 45, "MALE", "ANY"],
-  ["גרביים", "בדים והלבשה", 4, 8, 65, "ANY", "ANY"],
   ["בד פשתן", "בדים והלבשה", 20, 40, 30, "FEMALE", "OLD"],
   ["סביבון עץ", "צעצועים ומשחקים", 3, 7, 70, "MALE", "YOUNG"],
   ["בובת סמרטוטים", "צעצועים ומשחקים", 6, 12, 60, "FEMALE", "YOUNG"],
@@ -72,6 +71,9 @@ const PRODUCTS: P[] = [
   ["עט נובע", "ספרים וכתיבה", 20, 40, 35, "MALE", "OLD"],
   ["ספר סיפורים", "ספרים וכתיבה", 10, 20, 50, "ANY", "YOUNG"],
 ];
+
+/** Products removed from the catalog. Existing databases keep the row (old sales point to it) but it is turned off. */
+const REMOVED_PRODUCTS = ["גרביים"];
 
 const DECORATIONS = [
   { name: "דגלונים צבעוניים", cost: 20, points: 10 },
@@ -117,6 +119,8 @@ async function main() {
       create: { name, categoryId, supplierPrice, marketPrice, popularity, targetGender, targetAge },
     });
   }
+
+  await prisma.product.updateMany({ where: { name: { in: REMOVED_PRODUCTS } }, data: { isActive: false } });
 
   for (const d of DECORATIONS) {
     await prisma.decoration.upsert({ where: { name: d.name }, update: {}, create: d });
