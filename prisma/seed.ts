@@ -90,7 +90,14 @@ async function upsertUser(params: { email?: string; password?: string; name: str
   if (!params.email || !params.password) return null;
   const email = params.email.trim().toLowerCase();
   const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) return existing;
+  if (existing) {
+    // The password from the environment (e.g. Render) always wins:
+    // if it changed since the user was created, update the stored hash.
+    const samePassword = await bcrypt.compare(params.password, existing.passwordHash);
+    if (samePassword && existing.role === params.role) return existing;
+    const newHash = await bcrypt.hash(params.password, 10);
+    return prisma.user.update({ where: { id: existing.id }, data: { passwordHash: newHash, role: params.role } });
+  }
   const passwordHash = await bcrypt.hash(params.password, 10);
   const balance = params.role === "MERCHANT" ? 1000 : 0;
   const user = await prisma.user.create({
