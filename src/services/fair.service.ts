@@ -35,7 +35,7 @@ export async function getFair(userId: number) {
 /**
  * Customers visiting in the current game hour, with the stalls they bought from (for animation).
  * The simulation is shared by the whole fair, but each merchant SEES only a few of them:
- * 15 per active stall of her own, at least 5 and at most 80.
+ * 15 per active stall of her own, at least 10 and at most 80.
  * Order: first customers who bought at her stalls, then customers who want one of her products, then the rest.
  */
 export async function getActiveCustomers(userId: number) {

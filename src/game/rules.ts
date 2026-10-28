@@ -20,7 +20,7 @@ export const RULES = {
   CUSTOMERS_MAX: 15000,
   /** Customers shown to ONE merchant on screen = PER_STALL × her active stalls, between MIN and MAX. */
   VISIBLE_CUSTOMERS_PER_STALL: 15,
-  VISIBLE_CUSTOMERS_MIN: 5,
+  VISIBLE_CUSTOMERS_MIN: 10,
   VISIBLE_CUSTOMERS_MAX: 80,
   SHOPPING_LIST_MIN: 1,
   SHOPPING_LIST_MAX: 4,

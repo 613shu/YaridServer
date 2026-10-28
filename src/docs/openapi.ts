@@ -344,7 +344,7 @@ const paths: Record<string, Record<string, Json>> = {
 
   "/api/fair": { get: op({ tag: "Fair", summary: "All stalls (public info) + game clock", auth: "any", response: ref("Fair") }) },
   "/api/fair/customers": {
-    get: op({ tag: "Fair", summary: "Customers visiting this game hour that I see: 15 per own active stall, min 5, max 80", auth: "any", response: ref("FairCustomers") }),
+    get: op({ tag: "Fair", summary: "Customers visiting this game hour that I see: 15 per own active stall, min 10, max 80", auth: "any", response: ref("FairCustomers") }),
   },
 
   "/api/stalls/mine": {

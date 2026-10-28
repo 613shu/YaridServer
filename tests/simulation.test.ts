@@ -326,8 +326,8 @@ describe("fair customers endpoint", () => {
     expect(buyers.length > 0).toBe(salesNow > 0);
   });
 
-  it("visible customers = 15 per own active stall, at least 5 and at most 80", () => {
-    expect(visibleCustomerCount(0)).toBe(5);
+  it("visible customers = 15 per own active stall, at least 10 and at most 80", () => {
+    expect(visibleCustomerCount(0)).toBe(10);
     expect(visibleCustomerCount(1)).toBe(15);
     expect(visibleCustomerCount(3)).toBe(45);
     expect(visibleCustomerCount(6)).toBe(80);
