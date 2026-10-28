@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { prisma } from "../src/db/prisma";
-import { RULES, targetCustomerCount } from "../src/game/rules";
+import { RULES, targetCustomerCount, visibleCustomerCount } from "../src/game/rules";
 import { runTick } from "../src/simulation/engine";
 import { forgetPresence } from "../src/simulation/presence";
 import { skipOldMissedTime } from "../src/simulation/scheduler";
@@ -318,10 +318,19 @@ describe("fair customers endpoint", () => {
     expect(res.status).toBe(200);
     expect(res.body.clock).toMatchObject({ day: 1, hour: 9, msPerGameHour: 150000 });
     const visitors = await prisma.customer.count({ where: { visitHour: 9, listDay: 1 } });
-    expect(res.body.customers.length).toBe(visitors);
+    // one stall → she sees 15 customers at most (or fewer if fewer came this hour)
+    expect(res.body.customers.length).toBe(Math.min(visitors, visibleCustomerCount(1)));
     const buyers = res.body.customers.filter((c: { targetStallId: number | null }) => c.targetStallId !== null);
     for (const b of buyers) expect(b.targetStallIds).toContain(s.id);
     const salesNow = await prisma.sale.count({ where: { gameDay: 1, gameHour: 9 } });
     expect(buyers.length > 0).toBe(salesNow > 0);
+  });
+
+  it("visible customers = 15 per own active stall, at least 5 and at most 80", () => {
+    expect(visibleCustomerCount(0)).toBe(5);
+    expect(visibleCustomerCount(1)).toBe(15);
+    expect(visibleCustomerCount(3)).toBe(45);
+    expect(visibleCustomerCount(6)).toBe(80);
+    expect(visibleCustomerCount(100)).toBe(80);
   });
 });

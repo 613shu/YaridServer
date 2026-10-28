@@ -18,6 +18,10 @@ export const RULES = {
   CUSTOMERS_BASE: 150,
   CUSTOMERS_PER_STALL: 75,
   CUSTOMERS_MAX: 15000,
+  /** Customers shown to ONE merchant on screen = PER_STALL × her active stalls, between MIN and MAX. */
+  VISIBLE_CUSTOMERS_PER_STALL: 15,
+  VISIBLE_CUSTOMERS_MIN: 5,
+  VISIBLE_CUSTOMERS_MAX: 80,
   SHOPPING_LIST_MIN: 1,
   SHOPPING_LIST_MAX: 4,
   /** A merchant counts as online (stalls sell) if he sent a request in the last minute. */
@@ -146,6 +150,14 @@ export function sellQuote(params: {
 
 export function closeRefund(stock: number, supplierPrice: number): number {
   return Math.round(stock * supplierPrice * RULES.CLOSE_STOCK_REFUND_SHARE);
+}
+
+/** How many customers one merchant sees on screen, by her own active stalls only. */
+export function visibleCustomerCount(myActiveStalls: number): number {
+  const wanted = RULES.VISIBLE_CUSTOMERS_PER_STALL * myActiveStalls;
+  if (wanted < RULES.VISIBLE_CUSTOMERS_MIN) return RULES.VISIBLE_CUSTOMERS_MIN;
+  if (wanted > RULES.VISIBLE_CUSTOMERS_MAX) return RULES.VISIBLE_CUSTOMERS_MAX;
+  return wanted;
 }
 
 export function targetCustomerCount(stallCount: number): number {

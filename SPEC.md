@@ -49,6 +49,7 @@ Customers are server-managed virtual entities, not users. Nobody human can buy.
   3. Buys 1 unit if the price ≤ budgetLeft and the price ≤ 1.5 × marketPrice.
 - **Online only.** A merchant is online while his game is open: every authenticated request marks him as seen (in server memory), and he counts as online for 60 seconds after his last request. Offline merchants' stalls sell nothing and they pay no stall fee.
 - `/api/fair/customers` returns only the customers active in the current game hour, with their target stall, for frontend animation.
+  It is per viewer: 15 × the viewer's own ACTIVE stalls, min 5, max 80 (`VISIBLE_CUSTOMERS_*` in rules.ts). Customers who bought at her stalls come first, then customers who want one of her products, then the rest. The simulation itself (customer count, sales) is unchanged and shared by the whole fair.
 
 **Stall score (0–100)**
 Hidden from merchants, visible to admin. Recomputed every tick.

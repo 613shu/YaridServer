@@ -1528,7 +1528,7 @@
         "tags": [
           "Fair"
         ],
-        "summary": "Customers visiting in the current game hour, with target stalls",
+        "summary": "Customers visiting this game hour that I see: 15 per own active stall, min 5, max 80",
         "description": "🔒 Any logged-in user",
         "security": [
           {

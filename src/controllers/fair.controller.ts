@@ -6,6 +6,6 @@ export async function getFair(req: Request, res: Response) {
   res.json(await fair.getFair(currentUser(req).id));
 }
 
-export async function getCustomers(_req: Request, res: Response) {
-  res.json(await fair.getActiveCustomers());
+export async function getCustomers(req: Request, res: Response) {
+  res.json(await fair.getActiveCustomers(currentUser(req).id));
 }
